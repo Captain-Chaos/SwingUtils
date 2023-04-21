@@ -10,6 +10,7 @@
 
     <name>SwingUtils</name>
     <description>Various Swing and GUI utility classes used by pepsoft.org projects.</description>
+    <url>https://github.com/Captain-Chaos/SwingUtils</url>
     <inceptionYear>2011</inceptionYear>
 
     <licenses>
