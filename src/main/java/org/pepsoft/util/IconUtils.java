@@ -167,7 +167,7 @@ public final class IconUtils {
         final BufferedImage image = newBufferedImage(size);
         for (int x = 1; x < size - 1; x++) {
             for (int y = 1; y < size - 1; y++) {
-                image.setRGB(x, y, colour);
+                image.setRGB(x, y, 0xff000000 | colour);
             }
         }
         return new ImageIcon(image);
