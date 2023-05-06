@@ -20,7 +20,6 @@ import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicLong;
 
 import static org.pepsoft.util.GUIUtils.getUIScale;
-import static org.pepsoft.util.GUIUtils.getUIScaleInt;
 
 /**
  * A generic visual component which can display one or more layers of large or even endless tile-based images, with
@@ -369,7 +368,7 @@ public class TiledImageViewer extends JComponent implements TileListener, MouseL
     }
 
     public void resetZoom() {
-        setZoom((getUIScaleInt() == 1) ? 0 : 1);
+        setZoom((getUIScale() < 1.5f) ? 0 : 1);
     }
 
     /**

@@ -22,8 +22,7 @@ import static java.awt.Transparency.TRANSLUCENT;
 import static java.awt.geom.AffineTransform.getRotateInstance;
 import static java.awt.image.AffineTransformOp.TYPE_BICUBIC;
 import static java.lang.Math.toRadians;
-import static org.pepsoft.util.GUIUtils.getUIScaleInt;
-import static org.pepsoft.util.GUIUtils.scaleToUI;
+import static org.pepsoft.util.GUIUtils.*;
 
 /**
  * Utility methods for loading and scaling images and icons, with automatic
@@ -117,7 +116,7 @@ public final class IconUtils {
     public static BufferedImage loadScaledImage(String path) {
         BufferedImage image = loadUnscaledImage(path);
         if (image != null) {
-            return scaleToUI(image);
+            return scaleToUI(image, true);
         } else {
             return null;
         }
@@ -140,12 +139,12 @@ public final class IconUtils {
                 final String themedPath = path.substring(0, path.lastIndexOf('.')) + '_' + theme + path.substring(path.lastIndexOf('.'));
                 final URL url = classLoader.getResource(themedPath);
                 if (url != null) {
-                    return scaleToUI(ImageIO.read(url));
+                    return scaleToUI(ImageIO.read(url), true);
                 }
             }
             final URL url = classLoader.getResource(path);
             if (url != null) {
-                return scaleToUI(ImageIO.read(url));
+                return scaleToUI(ImageIO.read(url), true);
             } else {
                 return null;
             }
@@ -163,7 +162,7 @@ public final class IconUtils {
      * @return A 16x16 icon of the specified colour.
      */
     public static Icon createScaledColourIcon(int colour) {
-        final int size = 16 * getUIScaleInt();
+        final int size = Math.round(16 * getUIScale());
         final BufferedImage image = newBufferedImage(size);
         for (int x = 1; x < size - 1; x++) {
             for (int y = 1; y < size - 1; y++) {
@@ -174,14 +173,14 @@ public final class IconUtils {
     }
 
     public static Icon createScaledLetterIcon(char letter, Color colour) {
-        final int size = 16 * getUIScaleInt();
+        final int size = Math.round(16 * getUIScale());
         final BufferedImage image = newBufferedImage(size);
         final Graphics2D g2 = image.createGraphics();
         try {
-            g2.setFont(Font.decode("SansSerif-BOLD").deriveFont(16.0f * getUIScaleInt()));
+            g2.setFont(Font.decode("SansSerif-BOLD").deriveFont(16.0f * getUIScale()));
             g2.setColor(colour);
             g2.setRenderingHint(KEY_ANTIALIASING, VALUE_ANTIALIAS_ON);
-            g2.drawString(String.valueOf(letter), 1 + 2 * getUIScaleInt(), size - 1 - 2 * getUIScaleInt());
+            g2.drawString(String.valueOf(letter), Math.round(1 + 2 * getUIScale()), Math.round(size - 1 - 2 * getUIScale()));
         } finally {
             g2.dispose();
         }
@@ -211,7 +210,7 @@ public final class IconUtils {
      * @return The scaled icon.
      */
     public static BufferedImage scaleIcon(Image iconImage, int size) {
-        final int scaledSize = size * getUIScaleInt();
+        final int scaledSize = Math.round(size * getUIScale());
         if ((iconImage instanceof BufferedImage) && (((BufferedImage) iconImage).getWidth() == scaledSize)) {
             return (BufferedImage) iconImage;
         }
