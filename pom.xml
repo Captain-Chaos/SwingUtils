@@ -6,7 +6,7 @@
 
     <groupId>org.pepsoft.utils</groupId>
     <artifactId>SwingUtils</artifactId>
-    <version>1.1.0</version>
+    <version>1.1.1-SNAPSHOT</version>
 
     <name>SwingUtils</name>
     <description>Various Swing and GUI utility classes used by pepsoft.org projects.</description>
