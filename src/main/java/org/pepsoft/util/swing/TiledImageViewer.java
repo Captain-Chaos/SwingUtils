@@ -40,7 +40,7 @@ import static org.pepsoft.util.GUIUtils.getUIScale;
  * 
  * @author pepijn
  */
-public class TiledImageViewer extends JComponent implements TileListener, MouseListener, MouseMotionListener, ComponentListener, HierarchyListener {
+public class TiledImageViewer extends JComponent implements TileListener, MouseListener, MouseMotionListener, ComponentListener, HierarchyListener, Cloneable {
     /**
      * Create a new tiled image viewer which allows panning by dragging with the
      * left mouse button and which paints the central crosshair.
@@ -903,6 +903,45 @@ public class TiledImageViewer extends JComponent implements TileListener, MouseL
     }
 
     /**
+     * Create clone of this tiled image viewer with a copy of the current tile providers and tile provider caches, so
+     * that it can immediately display the same content, but then behave independently with regard to zooming and
+     * panning.
+     *
+     * @return A clone of this tiled image viewer with the same tile providers and a copy of the current contents of the
+     * caches.
+     */
+    @SuppressWarnings("MethodDoesntCallSuperMethod") // Yeah it's fine
+    @Override
+    public TiledImageViewer clone() {
+        final TiledImageViewer clone = new TiledImageViewer(leftClickDrags, paintCentre, tileProviderZoomCutoff);
+        clone.viewX = viewX;
+        clone.viewY = viewY;
+        clone.previousX = previousX;
+        clone.previousY= previousY;
+        clone.markerX = markerX;
+        clone.markerY = markerY;
+        clone.xOffset = xOffset;
+        clone.yOffset= yOffset;
+        clone.zoom = zoom;
+        clone.gridSize = gridSize;
+        clone.paintMarker = paintMarker;
+        clone.paintGrid = paintGrid;
+        clone.gridColour = gridColour;
+        clone.backgroundImage = backgroundImage;
+        clone.backgroundImageMode = backgroundImageMode;
+        clone.inhibitUpdates = inhibitUpdates;
+        clone.labelScale = labelScale;
+
+        // Copy the tile providers and tile caches
+        clone.tileProviders.putAll(tileProviders);
+        clone.tileProviderZoom.putAll(tileProviderZoom);
+        tileCaches.forEach((tileProvider, cache) -> clone.tileCaches.put(tileProvider, new HashMap<>(cache)));
+        dirtyTileCaches.forEach((tileProvider, cache) -> clone.dirtyTileCaches.put(tileProvider, new HashMap<>(cache)));
+
+        return clone;
+    }
+
+    /**
      * Determine whether a tile is currently visible in the viewport.
      *
      * @param x The X coordinate of the tile to check for visibility.
@@ -1609,10 +1648,8 @@ public class TiledImageViewer extends JComponent implements TileListener, MouseL
     @Override
     public void hierarchyChanged(HierarchyEvent event) {
         if (((event.getChangeFlags() & HierarchyEvent.DISPLAYABILITY_CHANGED) != 0)) {
-            // The JIDE framework temporarily removes the view from the
-            // hierarchy when the layout is reset, so we have to be prepared to
-            // reinitialise the render queue when the view is re-added to the
-            // hierarchy
+            // The JIDE framework temporarily removes the view from the hierarchy when the layout is reset, so we have
+            // to be prepared to reinitialise the render queue when the view is re-added to the hierarchy
             if (isDisplayable()) {
                 if (! tileProviders.isEmpty()) {
                     if (logger.isDebugEnabled()) {
@@ -1668,6 +1705,7 @@ public class TiledImageViewer extends JComponent implements TileListener, MouseL
      * The zoom level below which to delegate zooming to the tile providers, if they support it.
      */
     private final int tileProviderZoomCutoff;
+    private final Map<TileProvider, Integer> tileProviderZoom = new WeakHashMap<>();
     /**
      * The currently displayed location in scaled coordinates.
      */
@@ -1733,7 +1771,6 @@ public class TiledImageViewer extends JComponent implements TileListener, MouseL
     private BufferedImage backgroundImage;
     private BackgroundImageMode backgroundImageMode = BackgroundImageMode.CENTRE_REPEAT;
     private volatile boolean inhibitUpdates;
-    private Map<TileProvider, Integer> tileProviderZoom = new WeakHashMap<>();
     private int labelScale = 1;
 
     public static final int TILE_SIZE = 128, TILE_SIZE_BITS = 7, TILE_SIZE_MASK = 0x7f;
