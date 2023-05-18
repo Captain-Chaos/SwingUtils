@@ -47,17 +47,29 @@ public final class IconUtils {
     /**
      * Load an icon from the classpath using the system class loader.
      *
+     * <p>The icon will not be scaled.
+     *
+     * @param path The path of the image to load.
+     * @return The specified icon, or {@code null} if the specified path did not contain a resource.
+     */
+    public static ImageIcon loadUnscaledIcon(String path) {
+        final BufferedImage image = loadUnscaledImage(path);
+        return (image != null) ? new ImageIcon(image) : null;
+    }
+
+    /**
+     * Load an icon from the classpath using the system class loader.
+     *
      * <p>The icon will automatically be scaled up for HiDPI displays.
      *
      * @param path The path of the image to load.
-     * @return The specified icon, or {@code null} if the specified path
-     *     did not contain a resource.
+     * @return The specified icon, or {@code null} if the specified path did not contain a resource.
      */
     public static ImageIcon loadScaledIcon(String path) {
-        BufferedImage image = loadScaledImage(path);
+        final BufferedImage image = loadScaledImage(path);
         return (image != null) ? new ImageIcon(image) : null;
     }
-    
+
     /**
      * Load an icon from the classpath using a specific class loader.
      *
@@ -65,11 +77,10 @@ public final class IconUtils {
      *
      * @param classLoader The class loader to use to load the image.
      * @param path The path of the image to load.
-     * @return The specified icon, or {@code null} if the specified path
-     *     did not contain a resource.
+     * @return The specified icon, or {@code null} if the specified path did not contain a resource.
      */
     public static ImageIcon loadScaledIcon(ClassLoader classLoader, String path) {
-        BufferedImage image = loadScaledImage(classLoader, path);
+        final BufferedImage image = loadScaledImage(classLoader, path);
         return (image != null) ? new ImageIcon(image) : null;
     }
 
@@ -110,11 +121,10 @@ public final class IconUtils {
      * <p>The image will automatically be scaled up for HiDPI displays.
      *
      * @param path The path of the image to load.
-     * @return The specified image, or {@code null} if the specified path
-     *     did not contain a resource.
+     * @return The specified image, or {@code null} if the specified path did not contain a resource.
      */
     public static BufferedImage loadScaledImage(String path) {
-        BufferedImage image = loadUnscaledImage(path);
+        final BufferedImage image = loadUnscaledImage(path);
         if (image != null) {
             return scaleToUI(image, true);
         } else {
