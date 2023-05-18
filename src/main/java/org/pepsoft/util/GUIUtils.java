@@ -1,5 +1,6 @@
 package org.pepsoft.util;
 
+import org.pepsoft.util.swing.ManagesScale;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -98,13 +99,28 @@ public class GUIUtils {
             return;
         }
         for (Component component: container.getComponents()) {
+            if (component instanceof ManagesScale) {
+                continue;
+            }
             if (component instanceof JTable) {
                 JTable table = (JTable) component;
                 table.setRowHeight(Math.round(table.getRowHeight() * UI_SCALE_FLOAT));
                 table.setRowMargin(Math.round(table.getRowMargin() * UI_SCALE_FLOAT));
+                table.revalidate();
             } else if (component instanceof JTextArea) {
                 component.setFont(UIManager.getFont("TextField.font"));
-            } else if (component instanceof Container) {
+                component.revalidate();
+            } else if (component instanceof AbstractButton) {
+                final AbstractButton button = (AbstractButton) component;
+                if (button.getIcon() instanceof ImageIcon) {
+                    final ImageIcon icon = (ImageIcon) button.getIcon();
+                    if (icon.getIconWidth() == icon.getIconHeight()) {
+                        button.setIcon(IconUtils.scaleIcon(icon, icon.getIconWidth()));
+                        button.revalidate();
+                    }
+                }
+            }
+            if (component instanceof Container) {
                 scaleToUI((Container) component);
             }
         }
