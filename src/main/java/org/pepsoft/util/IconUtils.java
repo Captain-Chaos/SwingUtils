@@ -86,7 +86,7 @@ public final class IconUtils {
 
     /**
      * Load an image from the classpath using the system class loader. If {@code theme} is set it will first look for a
-     * themed version of the image by appending {@code _<theme>} to the filename.
+     * themed version of the image by looking in the {@code _<theme>} subdirectory.
      *
      * <p>The image will be returned at its original resolution and not be rescaled.
      *
@@ -95,10 +95,12 @@ public final class IconUtils {
      * @see #setTheme(String)
      */
     public static BufferedImage loadUnscaledImage(String path) {
+        path = path.replace('\\', '/');
+        path = path.startsWith("/") ? path.substring(1) : path;
         try {
-            path = path.startsWith("/") ? path.substring(1) : path;
             if (theme != null) {
-                final String themedPath = path.substring(0, path.lastIndexOf('.')) + '_' + theme + path.substring(path.lastIndexOf('.'));
+                final int p = path.lastIndexOf('/');
+                final String themedPath = path.substring(0, p) + '/' + theme + path.substring(p);
                 final URL url = ClassLoader.getSystemResource(themedPath);
                 if (url != null) {
                     return ImageIO.read(url);
@@ -134,7 +136,7 @@ public final class IconUtils {
     
     /**
      * Load an image from the classpath using a specific class loader. If {@code theme} is set it will first look for a
-     * themed version of the image by appending {@code _<theme>} to the filename.
+     * themed version of the image by looking in the {@code _<theme>} subdirectory.
      *
      * <p>The image will automatically be scaled up for HiDPI displays.
      *
@@ -144,9 +146,11 @@ public final class IconUtils {
      * @see #setTheme(String)
      */
     public static BufferedImage loadScaledImage(ClassLoader classLoader, String path) {
+        path = path.replace('\\', '/');
         try {
             if (theme != null) {
-                final String themedPath = path.substring(0, path.lastIndexOf('.')) + '_' + theme + path.substring(path.lastIndexOf('.'));
+                final int p = path.lastIndexOf('/');
+                final String themedPath = path.substring(0, p) + '/' + theme + path.substring(p);
                 final URL url = classLoader.getResource(themedPath);
                 if (url != null) {
                     return scaleToUI(ImageIO.read(url), true);
