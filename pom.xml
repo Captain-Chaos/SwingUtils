@@ -6,7 +6,7 @@
 
     <groupId>org.pepsoft.utils</groupId>
     <artifactId>SwingUtils</artifactId>
-    <version>1.2.3-SNAPSHOT</version>
+    <version>1.2.3</version>
 
     <name>SwingUtils</name>
     <description>Various Swing and GUI utility classes used by pepsoft.org projects.</description>
@@ -40,17 +40,6 @@
         <url>https://github.com/Captain-Chaos/SwingUtils</url>
     </scm>
 
-    <distributionManagement>
-        <snapshotRepository>
-            <id>ossrh-snapshots</id>
-            <url>https://oss.sonatype.org/content/repositories/snapshots</url>
-        </snapshotRepository>
-        <repository>
-            <id>ossrh-staging</id>
-            <url>https://oss.sonatype.org/service/local/staging/deploy/maven2</url>
-        </repository>
-    </distributionManagement>
-
     <properties>
         <maven.compiler.source>8</maven.compiler.source>
         <maven.compiler.target>8</maven.compiler.target>
@@ -61,7 +50,7 @@
         <dependency>
             <groupId>org.pepsoft.utils</groupId>
             <artifactId>Utils</artifactId>
-            <version>1.0.0</version>
+            <version>1.1.2</version>
         </dependency>
         <dependency>
             <groupId>org.jetbrains</groupId>
@@ -160,6 +149,15 @@
                                 </goals>
                             </execution>
                         </executions>
+                    </plugin>
+                    <plugin>
+                        <groupId>org.sonatype.central</groupId>
+                        <artifactId>central-publishing-maven-plugin</artifactId>
+                        <version>0.8.0</version>
+                        <extensions>true</extensions>
+                        <configuration>
+                            <publishingServerId>central</publishingServerId>
+                        </configuration>
                     </plugin>
                 </plugins>
             </build>
