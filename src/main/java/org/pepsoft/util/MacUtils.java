@@ -17,21 +17,18 @@
 
 package org.pepsoft.util;
 
-import org.pepsoft.util.mdc.MDCCapturingRuntimeException;
-
+import java.awt.*;
 import java.io.File;
 import java.util.List;
-
-import static org.pepsoft.util.SystemUtils.*;
 
 /**
  * Utility methods for integrating into the Mac OS X desktop environment.
  *
  * Created by pepijn on 16-04-15.
  */
-public abstract class MacUtils {
-    protected MacUtils() {
-        // Prevent illegal instantiation
+public class MacUtils {
+    private MacUtils() {
+        // Prevent instantiation
     }
 
     /**
@@ -45,7 +42,15 @@ public abstract class MacUtils {
      *     are too old.
      */
     public static boolean installQuitHandler(final QuitHandler quitHandler) {
-        return IMPL.doInstallQuitHandler(quitHandler);
+        Desktop.getDesktop().setQuitHandler((quitEvent, quitResponse) -> {
+            boolean shouldQuit = AwtUtils.resultOfOnEventThread(quitHandler::quitRequested);
+            if (shouldQuit) {
+                quitResponse.performQuit();
+            } else {
+                quitResponse.cancelQuit();
+            }
+        });
+        return true;
     }
 
     /**
@@ -58,7 +63,8 @@ public abstract class MacUtils {
      *     are too old.
      */
     public static boolean installAboutHandler(final AboutHandler aboutHandler) {
-        return IMPL.doInstallAboutHandler(aboutHandler);
+        Desktop.getDesktop().setAboutHandler(aboutEvent -> AwtUtils.doLaterOnEventThread(aboutHandler::aboutRequested));
+        return true;
     }
 
     /**
@@ -71,17 +77,17 @@ public abstract class MacUtils {
      *     are too old.
      */
     public static boolean installOpenFilesHandler(final OpenFilesHandler openFilesHandler) {
-        return IMPL.doInstallOpenFilesHandler(openFilesHandler);
+        Desktop.getDesktop().setOpenFileHandler(openFilesEvent -> {
+            final List<File> files = openFilesEvent.getFiles();
+            AwtUtils.doLaterOnEventThread(() -> openFilesHandler.filesOpened(files));
+        });
+        return true;
     }
 
     public static boolean installPreferencesHandler(final PreferencesHandler preferencesHandler) {
-        return IMPL.doInstallPreferencesHandler(preferencesHandler);
+        Desktop.getDesktop().setPreferencesHandler(preferencesEvent -> AwtUtils.doLaterOnEventThread(preferencesHandler::preferencesRequested));
+        return true;
     }
-
-    protected abstract boolean doInstallQuitHandler(QuitHandler quitHandler);
-    protected abstract boolean doInstallAboutHandler(AboutHandler aboutHandler);
-    protected abstract boolean doInstallOpenFilesHandler(OpenFilesHandler openFilesHandler);
-    protected abstract boolean doInstallPreferencesHandler(PreferencesHandler preferencesHandler);
 
     public interface QuitHandler {
         /**
@@ -111,19 +117,5 @@ public abstract class MacUtils {
 
     public interface PreferencesHandler {
         void preferencesRequested();
-    }
-
-    private static final MacUtils IMPL;
-
-    static {
-        if (JAVA_VERSION.isAtLeast(JAVA_9)) {
-            try {
-                IMPL = (MacUtils) Class.forName("org.pepsoft.util.MacUtilsJava9").newInstance();
-            } catch (InstantiationException | IllegalAccessException | ClassNotFoundException e) {
-                throw new MDCCapturingRuntimeException(e.getClass().getSimpleName() + " while loading Mac OS X support for Java 9", e);
-            }
-        } else {
-            IMPL = new MacUtilsJava8();
-        }
     }
 }

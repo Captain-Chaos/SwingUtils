@@ -6,7 +6,7 @@
 
     <groupId>org.pepsoft.utils</groupId>
     <artifactId>SwingUtils</artifactId>
-    <version>1.2.4-SNAPSHOT</version>
+    <version>2.0.0-SNAPSHOT</version>
 
     <name>SwingUtils</name>
     <description>Various Swing and GUI utility classes used by pepsoft.org projects.</description>
@@ -41,8 +41,8 @@
     </scm>
 
     <properties>
-        <maven.compiler.source>8</maven.compiler.source>
-        <maven.compiler.target>8</maven.compiler.target>
+        <maven.compiler.source>17</maven.compiler.source>
+        <maven.compiler.target>17</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
 
@@ -50,7 +50,7 @@
         <dependency>
             <groupId>org.pepsoft.utils</groupId>
             <artifactId>Utils</artifactId>
-            <version>1.1.2</version>
+            <version>2.0.0-SNAPSHOT</version>
         </dependency>
         <dependency>
             <groupId>org.jetbrains</groupId>
@@ -63,18 +63,6 @@
             <artifactId>AppleJavaExtensions</artifactId>
             <version>1.6</version>
             <scope>provided</scope>
-        </dependency>
-        <dependency>
-            <groupId>com.nativelibs4java</groupId>
-            <artifactId>bridj</artifactId>
-            <version>0.7.0</version>
-            <exclusions>
-                <exclusion>
-                    <groupId>com.google.android.tools</groupId>
-                    <artifactId>dx</artifactId>
-                </exclusion>
-            </exclusions>
-            <optional>true</optional>
         </dependency>
     </dependencies>
 
@@ -94,6 +82,7 @@
                             <use>false</use>
                             <version>false</version>
                             <doclint>none</doclint>
+                            <javadocExecutable>${java.home}/bin/javadoc</javadocExecutable>
                         </configuration>
                     </execution>
                 </executions>

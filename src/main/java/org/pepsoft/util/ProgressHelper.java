@@ -1,54 +1,58 @@
 package org.pepsoft.util;
 
-import org.pepsoft.util.mdc.MDCCapturingRuntimeException;
-
 import java.awt.*;
+import java.util.Map;
+import java.util.WeakHashMap;
 
-import static org.pepsoft.util.SystemUtils.JAVA_9;
-import static org.pepsoft.util.SystemUtils.JAVA_VERSION;
+import static java.awt.Taskbar.Feature.PROGRESS_STATE_WINDOW;
+import static java.awt.Taskbar.Feature.PROGRESS_VALUE_WINDOW;
 
 /**
  * Created by Pepijn on 27-11-2016.
  */
-abstract class ProgressHelper {
+class ProgressHelper {
     static ProgressHelper getInstance() {
-        return IMPL;
+        return INSTANCE;
     }
 
-    abstract void setProgress(Window window, int percentage);
+    ProgressHelper() {
+        enabled = Taskbar.isTaskbarSupported()
+                && Taskbar.getTaskbar().isSupported(PROGRESS_VALUE_WINDOW)
+                && Taskbar.getTaskbar().isSupported(PROGRESS_STATE_WINDOW);
+    }
 
-    abstract void setProgressDone(Window window);
-
-    abstract void setProgressError(Window window);
-
-    private static final ProgressHelper IMPL;
-
-    static {
-        if (JAVA_VERSION.isAtLeast(JAVA_9)) {
-            try {
-                IMPL = (ProgressHelper) Class.forName("org.pepsoft.util.ProgressHelperJava9").newInstance();
-            } catch (InstantiationException | IllegalAccessException | ClassNotFoundException e) {
-                throw new MDCCapturingRuntimeException(e.getClass().getSimpleName() + " while loading progress reporting support for Java 9", e);
-            }
-        } else if (SystemUtils.isWindows()) {
-            IMPL = new ProgressHelperWindowsJava8();
-        } else {
-            IMPL = new ProgressHelper() {
-                @Override
-                void setProgress(Window window, int percentage) {
-                    // Do nothing
-                }
-
-                @Override
-                void setProgressDone(Window window) {
-                    // Do nothing
-                }
-
-                @Override
-                void setProgressError(Window window) {
-                    // Do nothing
-                }
-            };
+    void setProgress(Window window, int percentage) {
+        if (! enabled) {
+            return;
         }
+        if (errorStates.getOrDefault(window, false)) {
+            return;
+        }
+        Taskbar.getTaskbar().setWindowProgressValue(window, percentage);
     }
+
+    void setProgressDone(Window window) {
+        if (! enabled) {
+            return;
+        }
+        Taskbar.getTaskbar().setWindowProgressState(window, Taskbar.State.OFF);
+        errorStates.remove(window);
+    }
+
+    void setProgressError(Window window) {
+        if (! enabled) {
+            return;
+        }
+        if (errorStates.getOrDefault(window, false)) {
+            return;
+        } else {
+            errorStates.put(window, true);
+        }
+        Taskbar.getTaskbar().setWindowProgressState(window, Taskbar.State.ERROR);
+    }
+
+    private final boolean enabled;
+    private final Map<Window, Boolean> errorStates = new WeakHashMap<>();
+
+    private static final ProgressHelper INSTANCE = new ProgressHelper();
 }
