@@ -14,6 +14,9 @@ import org.pepsoft.util.ProgressReceiver;
 import org.pepsoft.util.SubProgressReceiver;
 import org.pepsoft.util.mdc.MDCCapturingRuntimeException;
 
+import java.util.concurrent.atomic.AtomicLong;
+
+import static org.pepsoft.util.AwtUtils.doLaterOnEventThread;
 import static org.pepsoft.util.AwtUtils.doOnEventThreadAndWait;
 
 /**
@@ -23,6 +26,8 @@ import static org.pepsoft.util.AwtUtils.doOnEventThreadAndWait;
  * @author pepijn
  */
 final class ProgressViewer extends javax.swing.JPanel implements ProgressReceiver {
+    private final AtomicLong lastProgress = new AtomicLong();
+
     @SuppressWarnings("LeakingThisInConstructor") // Construction done at that point
     ProgressViewer(SubProgressReceiver subProgressReceiver) {
         this.subProgressReceiver = subProgressReceiver;
@@ -51,12 +56,17 @@ final class ProgressViewer extends javax.swing.JPanel implements ProgressReceive
     
     @Override
     public void setProgress(final float progress) {
-        doOnEventThreadAndWait(() -> {
-            if (jProgressBar1.isIndeterminate()) {
-                jProgressBar1.setIndeterminate(false);
+        long time = System.currentTimeMillis();
+        if (this.lastProgress.get()+500<time) {
+            if (this.lastProgress.getAndSet(time)+500 < time) {
+                doLaterOnEventThread(() -> {
+                    if (jProgressBar1.isIndeterminate()) {
+                        jProgressBar1.setIndeterminate(false);
+                    }
+                    jProgressBar1.setValue(Math.round(progress * 100f));
+                });
             }
-            jProgressBar1.setValue(Math.round(progress * 100f));
-        });
+        }
     }
 
     @Override
