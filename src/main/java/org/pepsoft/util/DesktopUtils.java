@@ -211,5 +211,11 @@ public final class DesktopUtils {
         open(documentsFolder);
     }
 
+    /**
+     * The {@link java.awt.event.InputEvent input event} mask that corresponds to this platform's default modifier
+     * key(s) for command keyboard shortcuts.
+     */
+    public static final int PLATFORM_COMMAND_MASK = Toolkit.getDefaultToolkit().getMenuShortcutKeyMaskEx();
+
     private static final org.slf4j.Logger logger = org.slf4j.LoggerFactory.getLogger(DesktopUtils.class);
 }
